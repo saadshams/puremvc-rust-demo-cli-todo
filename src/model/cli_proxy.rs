@@ -18,28 +18,23 @@ impl CLIProxy {
         }
     }
 
-    pub fn list(&self) -> Vec<Todo> {
-        match fs::read_to_string("todos.json") {
-            Ok(json) => {
-                Todo::parse_array(&json)
-            }
-            Err(error) => {
-                eprintln!("Error reading file: {}", error);
-                vec![]
-            }
-        }
+    pub fn list(&self) -> Result<Vec<Todo>, String> {
+        let json = fs::read_to_string("todos.json")
+            .map_err(|e| format!("Error reading todos.json: {}", e))?;
+
+        Ok(Todo::parse_array(&json))
     }
 
     pub fn add(&self, command: &Command) -> Result<Vec<Todo>, String> {
-        let todos = &mut self.list();
+        let mut todos = self.list()?;
         if let Some(title) = command.options.get("-t").or_else(|| command.options.get("--title")) {
             let id = todos.iter().map(|todo| todo.id).max().unwrap_or(0) + 1;
-            todos.push(Todo{id, title: title.clone(), completed: false });
+            todos.push(Todo { id, title: title.clone(), completed: false });
 
-            fs::write("todos.json", format!("{}", Todo::stringify_array(todos)))
+            fs::write("todos.json", Todo::stringify_array(&todos))
                 .map_err(|error| format!("Failed to write todos.json: {}", error))?;
 
-            Ok(todos.clone())
+            Ok(todos)
         } else {
             Err("No title provided (use -t or --title)".into())
         }
@@ -62,7 +57,7 @@ impl CLIProxy {
             .parse::<u32>()
             .map_err(|e| format!("Invalid id: {e}"))?;
 
-        let todos = &mut self.list();
+        let mut todos = self.list()?;
         for todo in todos.iter_mut() {
             if todo.id == id {
                 todo.title = title.clone();
@@ -70,10 +65,10 @@ impl CLIProxy {
             }
         }
 
-        fs::write("todos.json", format!("{}", Todo::stringify_array(todos)))
+        fs::write("todos.json", format!("{}", Todo::stringify_array(&todos)))
             .map_err(|error| format!("Failed to write todos.json: {}", error))?;
 
-        Ok(todos.clone())
+        Ok(todos)
     }
 
     pub fn delete(&self, command: &Command) -> Result<Vec<Todo>, String> {
@@ -81,16 +76,16 @@ impl CLIProxy {
             .parse::<u32>()
             .map_err(|e| format!("Invalid id: {e}"))?;
 
-        let todos = &mut self.list();
+        let mut todos = self.list()?;
         todos.retain(|todo| todo.id != id);
         for (i, todo) in todos.iter_mut().enumerate() {
             todo.id = (i + 1) as u32;
         }
 
-        fs::write("todos.json", format!("{}", Todo::stringify_array(todos)))
+        fs::write("todos.json", format!("{}", Todo::stringify_array(&todos)))
             .map_err(|error| format!("Failed to write todos.json: {}", error))?;
 
-        Ok(todos.clone())
+        Ok(todos)
     }
 
 }
