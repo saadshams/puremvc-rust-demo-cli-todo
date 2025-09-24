@@ -43,8 +43,7 @@ impl CLI {
                     i += 1;
                 }
             } else {
-                // extra positional argument
-                i += 1;
+                i += 1; // extra positional argument
             }
         }
 
@@ -53,8 +52,15 @@ impl CLI {
         }
     }
 
-    pub fn result(&self, todos: &[Todo]) {
-        println!("{}", Todo::print_array(todos));
+    pub fn result(&self, command: Command) {
+        if let Some(result) = command.result {
+            match result {
+                Ok(todos) => println!("{}", Todo::print_array(&todos)),
+                Err(err) => eprintln!("\x1b[31;1merror:\x1b[0m {}", err),
+            }
+        } else {
+            eprintln!("\x1b[31;1merror:\x1b[0m No valid result in command.");
+        }
     }
 
     pub fn fault(&self, error: String) {
@@ -65,13 +71,3 @@ impl CLI {
         self.delegate = Some(delegate);
     }
 }
-
-/*
-[
-    {"id": 1, "title": "Buy groceries", "completed": false},
-    {"id": 2, "title": "Water the plants", "completed": false},
-    {"id": 3, "title": "Pay bills", "completed": false},
-    {"id": 4, "title": "Finish project report", "completed": true},
-    {"id": 5, "title": "Watch a movie", "completed": true}
-]
- */

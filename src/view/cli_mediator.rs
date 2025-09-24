@@ -2,7 +2,7 @@ use std::any::{Any};
 use std::sync::{Arc, RwLock, Weak};
 use puremvc::interfaces::{IFacade, IMediator, INotification, INotifier};
 use puremvc::patterns::Mediator;
-use crate::model::value_object::{Todo};
+use crate::model::value_object::{Command};
 use crate::application_facade::ApplicationFacade;
 use crate::view::components::CLI;
 
@@ -47,10 +47,10 @@ impl IMediator for CLIMediator {
     fn handle_notification(&mut self, notification: &Arc<dyn INotification>) {
         match notification.name() {
             ApplicationFacade::CLI_RESULT => {
-                let todos = notification.body()
-                    .and_then(|arc| arc.downcast_ref::<Vec<Todo>>().cloned())
+                let command = notification.body()
+                    .and_then(|arc| arc.downcast_ref::<Command>().cloned())
                     .expect("[CLIMediator] Error: Could not read todos");
-                self.cli().read().unwrap().result(&todos)
+                self.cli().read().unwrap().result(command);
             },
             ApplicationFacade::CLI_FAULT => {
                 let error = notification.body()

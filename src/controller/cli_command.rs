@@ -4,7 +4,7 @@ use puremvc::interfaces::{ICommand, IFacade, INotification, INotifier};
 use puremvc::patterns::SimpleCommand;
 use crate::ApplicationFacade;
 use crate::model::CLIProxy;
-use crate::model::value_object::{Command, Todo};
+use crate::model::value_object::{Command};
 
 pub struct CLICommand {
     command: SimpleCommand
@@ -15,9 +15,9 @@ impl CLICommand {
         Self { command: SimpleCommand::new() }
     }
 
-    fn result(&self, result: Result<Vec<Todo>, String>) {
+    fn result(&self, result: Result<Command, String>) {
         match result {
-            Ok(todos) => self.send_notification(ApplicationFacade::CLI_RESULT, Some(Arc::new(todos)), None),
+            Ok(command) => self.send_notification(ApplicationFacade::CLI_RESULT, Some(Arc::new(command)), None),
             Err(error) => self.send_notification(ApplicationFacade::CLI_FAULT, Some(Arc::new(error)), None),
         }
     }
@@ -26,7 +26,8 @@ impl CLICommand {
 impl ICommand for CLICommand {
     fn execute(&mut self, notification: &Arc<dyn INotification>) {
         let command = notification.body().and_then(|body| body.downcast_ref::<Command>())
-            .expect("Notification body must be a Command.");
+            .expect("Notification body must be a Command.")
+            .clone(); // now owned
 
         let proxy_arc = self.facade().retrieve_proxy(CLIProxy::NAME)
             .expect("CLIProxy must exist.");
@@ -36,15 +37,16 @@ impl ICommand for CLICommand {
             .expect("Proxy must be a CLIProxy.");
 
         match command.subcommand.0.as_str() {
-            "list" => self.result(proxy.list()),
+            "list" => self.result(proxy.list(command)), // found &Command error
             "add" => self.result(proxy.add(command)),
             "edit" => self.result(proxy.edit(command)),
             "delete" => self.result(proxy.delete(command)),
+            // "help" => self.result(proxy.help(command)),
             _ => {
                 if command.subcommand.0.is_empty() {
                     eprintln!("{}error:{} No subcommand was provided. \n\tSee 'todo --help' for a list of commands.", "\x1b[31;1m", "\x1b[0m");
                 } else {
-                    eprintln!("{}error:{} unrecognized command '{}'. See 'todo --help'.", "\x1b[31;1m", "\x1b[0m", command.subcommand.0);
+                    eprintln!("\x1b[31;1merror:\x1b[0m unrecognized command '{}'. See 'todo --help'.", command.subcommand.0);
                 }
             }
         }
@@ -64,3 +66,14 @@ impl INotifier for CLICommand {
         self.command.send_notification(name, body, type_);
     }
 }
+
+/*
+if let Some(result) = &command.result {
+    if let Some(todos) = result.downcast_ref::<Result<Vec<Todo>, String>>() {
+        match todos {
+            Ok(list) => println!("Todos: {:?}", list),
+            Err(err) => eprintln!("Error: {}", err),
+        }
+    }
+}
+ */
