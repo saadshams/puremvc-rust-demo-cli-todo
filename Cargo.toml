@@ -1,0 +1,7 @@
+[package]
+name = "todo"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+puremvc = { path = "../puremvc-rust-multicore-framework" }
