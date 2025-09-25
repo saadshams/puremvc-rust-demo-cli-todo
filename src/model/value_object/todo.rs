@@ -13,8 +13,12 @@ impl Todo {
     }
 
     pub fn stringify_array(todos: &[Todo]) -> String {
-        let items: Vec<String> = todos.iter().map(|todo| format!("    {}", todo.stringify())).collect();
-        format!("[\n{}\n]", items.join(",\n"))
+        let items = todos.iter()
+            .map(|todo| format!("    {}", todo.stringify()))
+            .collect::<Vec<String>>()
+            .join(",\n");
+        
+        format!("[\n{}\n]", items)
     }
 
     pub fn parse(json: &str) -> Todo {
