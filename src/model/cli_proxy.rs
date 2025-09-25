@@ -80,7 +80,7 @@ impl CLIProxy {
     pub fn delete(&self, mut command: Command) -> Result<Command, String> {
         let id = command.subcommand.1
             .parse::<u32>()
-            .map_err(|e| format!("\x1b[31;1mError:\x1b[0m Invalid ID format:: {e}"))?;
+            .map_err(|e| format!("\x1b[31;1mError:\x1b[0m Invalid ID format: {e}"))?;
 
         let mut todos = Todo::parse_array(&self.read()?);
         todos.retain(|todo| todo.id != id);
@@ -119,11 +119,11 @@ impl CLIProxy {
 
     pub fn reset(&self, mut command: Command) -> Result<Command, String> {
         self.write(r#"[
-    {"id": 0, "title": "Buy groceries", "completed": false},
-    {"id": 1, "title": "Water the plants", "completed": false},
-    {"id": 2, "title": "Read a book", "completed": true},
-    {"id": 3, "title": "Write a report", "completed": false},
-    {"id": 4, "title": "Watch a movie", "completed": true}
+    {"id": 1, "title": "Buy groceries", "completed": false},
+    {"id": 2, "title": "Water the plants", "completed": false},
+    {"id": 3, "title": "Read a book", "completed": true},
+    {"id": 4, "title": "Write a report", "completed": false},
+    {"id": 5, "title": "Watch a movie", "completed": true}
 ]"#)?;
 
         let todos = Todo::parse_array(&self.read()?);
