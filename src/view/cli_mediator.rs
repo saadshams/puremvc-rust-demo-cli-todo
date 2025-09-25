@@ -41,7 +41,10 @@ impl IMediator for CLIMediator {
     }
 
     fn list_notification_interests(&self) -> Vec<String> {
-        vec![ApplicationFacade::CLI_RESULT.to_string()]
+        vec![
+            ApplicationFacade::CLI_RESULT.to_string(),
+            ApplicationFacade::CLI_FAULT.to_string(),
+        ]
     }
 
     fn handle_notification(&mut self, notification: &Arc<dyn INotification>) {

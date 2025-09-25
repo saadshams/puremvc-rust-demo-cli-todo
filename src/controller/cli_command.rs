@@ -17,8 +17,10 @@ impl CLICommand {
 
     fn result(&self, result: Result<Command, String>) {
         match result {
-            Ok(command) => self.send_notification(ApplicationFacade::CLI_RESULT, Some(Arc::new(command)), None),
-            Err(error) => self.send_notification(ApplicationFacade::CLI_FAULT, Some(Arc::new(error)), None),
+            Ok(command) =>
+                self.send_notification(ApplicationFacade::CLI_RESULT, Some(Arc::new(command)), None),
+            Err(error) =>
+                self.send_notification(ApplicationFacade::CLI_FAULT, Some(Arc::new(error)), None),
         }
     }
 }
@@ -35,7 +37,7 @@ impl ICommand for CLICommand {
         let mut guard = proxy_arc.write().unwrap();
         let proxy = guard.as_any().downcast_ref::<CLIProxy>()
             .expect("Proxy must be a CLIProxy.");
-        
+
         match command.subcommand.0.as_str() {
             "list" => self.result(proxy.list(command)),
             "add" => self.result(proxy.add(command)),
@@ -45,13 +47,15 @@ impl ICommand for CLICommand {
             "-v" | "--version" => self.result(proxy.version(command)),
             "reset" => self.result(proxy.reset(command)),
             _ => {
-                if command.subcommand.0.is_empty() {
-                    eprintln!("{}error:{} No subcommand was provided. \n\tSee 'todo --help' for a list of commands.", "\x1b[31;1m", "\x1b[0m");
+                let msg = if command.subcommand.0.is_empty() {
+                    "\x1b[31;1mError:\x1b[0m No subcommand was provided. See 'todo --help' for a list of commands.".to_string()
                 } else {
-                    eprintln!("\x1b[31;1merror:\x1b[0m unrecognized command '{}'. See 'todo --help'.", command.subcommand.0);
-                }
+                    format!("\x1b[31;1mError:\x1b[0m Unrecognized command '{}'. See 'todo --help'.", command.subcommand.0)
+                };
+
+                self.result(Err(msg))
             }
-        }
+        };
     }
 }
 

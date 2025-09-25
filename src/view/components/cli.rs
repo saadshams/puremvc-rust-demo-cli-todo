@@ -66,7 +66,7 @@ impl CLI {
     }
 
     pub fn fault(&self, error: String) {
-        println!("Fault occurred! {}", error);
+        println!("{}", error);
     }
 
     pub fn set_delegate(&mut self, delegate: Arc<dyn Fn(Arc<dyn Any + Send + Sync>) + Send + Sync>) {
