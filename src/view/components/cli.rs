@@ -12,13 +12,16 @@ impl CLI {
     }
 
     pub fn parse(&self, args: Vec<String>) {
-        if args.len() < 2 { return eprintln!("Usage: todo <command> [options]"); }
+        if args.len() < 2 {
+            eprintln!("Usage: todo <command> [options]");
+            return;
+        }
 
         let mut i = 1; // skip program name
         let mut command = Command::new();
 
-        // Subcommand
-        if i < args.len() && !args[i].starts_with('-') && !args[i].starts_with("--") {
+        // Subcommand name
+        if i < args.len() && !args[i].starts_with('-') {
             command.subcommand.0 = args[i].clone();
             i += 1;
         }
@@ -32,9 +35,9 @@ impl CLI {
         // Options
         while i < args.len() {
             let arg = &args[i];
-            if arg.starts_with("--") || arg.starts_with('-') {
+            if arg.starts_with("-") {
                 let key = arg.clone();
-                if i + 1 < args.len() && !args[i + 1].starts_with('-') && !args[i + 1].starts_with("--") {
+                if i + 1 < args.len() && !args[i + 1].starts_with('-') {
                     command.options.insert(key, args[i + 1].clone()); // key + value
                     i += 2;
                 } else {
@@ -42,7 +45,8 @@ impl CLI {
                     i += 1;
                 }
             } else {
-                i += 1; // extra positional argument
+                command.extra_args.push(arg.clone()); // extra positional argument
+                i += 1;
             }
         }
 

@@ -4,6 +4,7 @@ use std::collections::HashMap;
 pub struct Command {
     pub subcommand: (String, String),
     pub options: HashMap<String, String>,
+    pub extra_args: Vec<String>,
     pub result: Result<String, String>,
 }
 
@@ -12,6 +13,7 @@ impl Command {
         Self {
             subcommand: ("".to_string(), "".to_string()),
             options: HashMap::new(),
+            extra_args: Vec::new(),
             result: Ok(String::new()),
         }
     }
