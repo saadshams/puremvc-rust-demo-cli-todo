@@ -84,6 +84,7 @@ impl CLIProxy {
 
         let mut todos = Todo::parse_array(&self.read()?);
         todos.retain(|todo| todo.id != id);
+
         for (i, todo) in todos.iter_mut().enumerate() {
             todo.id = (i + 1) as u32;
         }

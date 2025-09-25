@@ -27,16 +27,16 @@ impl CLICommand {
 
 impl ICommand for CLICommand {
     fn execute(&mut self, notification: &Arc<dyn INotification>) {
-        let command = notification.body().and_then(|body| body.downcast_ref::<Command>())
-            .expect("Notification body must be a Command.")
-            .clone();
-
         let proxy_arc = self.facade().retrieve_proxy(CLIProxy::NAME)
-            .expect("CLIProxy must exist.");
+            .expect("[CLICommand] Error: CLIProxy must exist.");
 
         let mut guard = proxy_arc.write().unwrap();
         let proxy = guard.as_any().downcast_ref::<CLIProxy>()
-            .expect("Proxy must be a CLIProxy.");
+            .expect("[CLICommand] Error: Proxy must be a CLIProxy.");
+
+        let command = notification.body().and_then(|body| body.downcast_ref::<Command>())
+            .expect("[CLICommand] Error: Notification body must be a Command.")
+            .clone();
 
         match command.subcommand.0.as_str() {
             "list" => self.result(proxy.list(command)),
@@ -50,15 +50,13 @@ impl ICommand for CLICommand {
                     self.result(proxy.version(command));
                 } else if command.options.contains_key("-r") || command.options.contains_key("--reset") {
                     self.result(proxy.reset(command));
+                } else if command.subcommand.0.is_empty() {
+                    self.result(Err("\x1b[31;1mError:\x1b[0m No Command or Subcommand was provided. See 'todo --help' for a list of commands.".to_string()));
                 } else {
-                   if command.subcommand.0.is_empty() {
-                        self.result(Err("\x1b[31;1mError:\x1b[0m No Command or Subcommand was provided. See 'todo --help' for a list of commands.".to_string()));
-                    } else {
-                        self.result(Err(format!("\x1b[31;1mError:\x1b[0m Unrecognized command '{}'. See 'todo --help'.", command.subcommand.0)));
-                    };
-                }
+                    self.result(Err(format!("\x1b[31;1mError:\x1b[0m Unrecognized command '{}'. See 'todo --help'.", command.subcommand.0)));
+                };
             }
-        };
+        }
     }
 }
 
