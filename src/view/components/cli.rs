@@ -45,7 +45,7 @@ impl CLI {
                     i += 1;
                 }
             } else {
-                command.extra_args.push(arg.clone()); // extra positional argument
+                command.extra_args.push(arg.clone()); // extra arguments
                 i += 1;
             }
         }
