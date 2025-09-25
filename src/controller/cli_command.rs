@@ -27,7 +27,7 @@ impl ICommand for CLICommand {
     fn execute(&mut self, notification: &Arc<dyn INotification>) {
         let command = notification.body().and_then(|body| body.downcast_ref::<Command>())
             .expect("Notification body must be a Command.")
-            .clone(); // now owned
+            .clone();
 
         let proxy_arc = self.facade().retrieve_proxy(CLIProxy::NAME)
             .expect("CLIProxy must exist.");
@@ -35,13 +35,15 @@ impl ICommand for CLICommand {
         let mut guard = proxy_arc.write().unwrap();
         let proxy = guard.as_any().downcast_ref::<CLIProxy>()
             .expect("Proxy must be a CLIProxy.");
-
+        
         match command.subcommand.0.as_str() {
-            "list" => self.result(proxy.list(command)), // found &Command error
+            "list" => self.result(proxy.list(command)),
             "add" => self.result(proxy.add(command)),
             "edit" => self.result(proxy.edit(command)),
             "delete" => self.result(proxy.delete(command)),
-            // "help" => self.result(proxy.help(command)),
+            "-h" | "--help" => self.result(proxy.help(command)),
+            "-v" | "--version" => self.result(proxy.version(command)),
+            "reset" => self.result(proxy.reset(command)),
             _ => {
                 if command.subcommand.0.is_empty() {
                     eprintln!("{}error:{} No subcommand was provided. \n\tSee 'todo --help' for a list of commands.", "\x1b[31;1m", "\x1b[0m");
@@ -66,14 +68,3 @@ impl INotifier for CLICommand {
         self.command.send_notification(name, body, type_);
     }
 }
-
-/*
-if let Some(result) = &command.result {
-    if let Some(todos) = result.downcast_ref::<Result<Vec<Todo>, String>>() {
-        match todos {
-            Ok(list) => println!("Todos: {:?}", list),
-            Err(err) => eprintln!("Error: {}", err),
-        }
-    }
-}
- */

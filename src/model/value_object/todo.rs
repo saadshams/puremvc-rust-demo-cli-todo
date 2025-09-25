@@ -68,7 +68,7 @@ impl Todo {
 
     pub fn print_array(todos: &[Todo]) -> String {
         let body = todos.iter()
-            .map(|todo| format!("  {}", Todo::print(todo))) // reuse print()
+            .map(|todo| format!("  {}", Todo::print(todo)))
             .collect::<Vec<String>>()
             .join(",\n");
 

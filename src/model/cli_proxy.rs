@@ -30,7 +30,7 @@ impl CLIProxy {
 
     pub fn list(&self, mut command: Command) -> Result<Command, String> {
         let todos = Todo::parse_array(&self.read()?);
-        command.result = Some(Ok(todos));
+        command.result = Some(Ok(Todo::print_array(&todos)));
         Ok(command)
     }
 
@@ -42,7 +42,7 @@ impl CLIProxy {
             todos.push(Todo { id, title: title.clone(), completed: false });
 
             self.write(&Todo::stringify_array(&todos))?;
-            command.result = Some(Ok(todos));
+            command.result = Some(Ok(Todo::print_array(&todos)));
             Ok(command)
         } else {
             Err("No title provided (use -t or --title)".into())
@@ -72,7 +72,7 @@ impl CLIProxy {
 
         self.write(&Todo::stringify_array(&todos))?;
 
-        command.result = Some(Ok(todos));
+        command.result = Some(Ok(Todo::print_array(&todos)));
         Ok(command)
     }
 
@@ -88,30 +88,45 @@ impl CLIProxy {
         }
 
         self.write(&Todo::stringify_array(&todos))?;
-        command.result = Some(Ok(todos));
+        command.result = Some(Ok(Todo::print_array(&todos)));
         Ok(command)
     }
 
-    pub fn help(&self, command: &Command) -> Result<String, String> {
-        Ok(String::from(
+    pub fn help(&self, mut command: Command) -> Result<Command, String> {
+        let body = String::from(
             "Available commands:\n\
          - list                  List all todos\n\
          - add -t <title>        Add a new todo\n\
          - edit <id> -t <title>  Edit a todo\n\
          - delete <id>           Delete a todo\n\
-         - reset                 Reset todos.json to default\n\
-         - help                  Show this help message",
-        ))
+         - help                  Show this help message\n\
+         - version               Show the version\n\
+         - reset                 Reset todos.json to default"
+        );
+
+        command.result = Some(Ok(body));
+        Ok(command)
     }
 
-    fn reset(&self) -> Result<(), String> {
+    pub fn version(&self, mut command: Command) -> Result<Command, String> {
+        let body = format!("todo version {}", env!("CARGO_PKG_VERSION"));
+
+        command.result = Some(Ok(body));
+        Ok(command)
+    }
+
+    pub fn reset(&self, mut command: Command) -> Result<Command, String> {
         self.write(r#"[
-            {"title": "Buy groceries", "completed": false},
-            {"title": "Water the plants", "completed": false},
-            {"title": "Read a book", "completed": true},
-            {"title": "Write a report", "completed": false},
-            {"title": "Watch a movie", "completed": true}
-        ]"#)
+    {"id": 0, "title": "Buy groceries", "completed": false},
+    {"id": 1, "title": "Water the plants", "completed": false},
+    {"id": 2, "title": "Read a book", "completed": true},
+    {"id": 3, "title": "Write a report", "completed": false},
+    {"id": 4, "title": "Watch a movie", "completed": true}
+]"#)?;
+
+        let todos = Todo::parse_array(&self.read()?);
+        command.result = Some(Ok(Todo::print_array(&todos)));
+        Ok(command)
     }
 
 }

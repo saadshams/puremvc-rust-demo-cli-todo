@@ -55,7 +55,7 @@ impl IMediator for CLIMediator {
             ApplicationFacade::CLI_FAULT => {
                 let error = notification.body()
                     .and_then(|arc| arc.downcast_ref::<String>().cloned())
-                    .expect("[CLIMediator] Error: Could not read todos");
+                    .expect("[CLIMediator] Error: Could not read error");
                 self.cli().read().unwrap().fault(error)
             },
             _ => {},

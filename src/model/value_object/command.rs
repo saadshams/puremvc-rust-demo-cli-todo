@@ -1,11 +1,10 @@
 use std::collections::HashMap;
-use crate::model::value_object::Todo;
 
-#[derive(Clone)] 
+#[derive(Clone)]
 pub struct Command {
     pub subcommand: (String, String),
     pub options: HashMap<String, String>,
-    pub result: Option<Result<Vec<Todo>, String>>,
+    pub result: Option<Result<String, String>>,
 }
 
 impl Command {

@@ -1,6 +1,6 @@
 use std::any::Any;
 use std::sync::{Arc};
-use crate::model::value_object::{Command, Todo};
+use crate::model::value_object::{Command};
 
 pub struct CLI {
     delegate: Option<Arc<dyn Fn(Arc<dyn Any + Send + Sync>) + Send + Sync>>
@@ -15,16 +15,18 @@ impl CLI {
         if args.len() < 2 { return eprintln!("Usage: todo <command> [options]"); }
 
         let mut i = 1; // skip program name
-
         let mut command = Command::new();
 
         // Subcommand
-        if i < args.len() && !args[i].starts_with('-') && !args[i].starts_with("--") {
-            command.subcommand.0 = args[i].clone();
-            i += 1;
+        if i < args.len() {
+            let arg = &args[i];
+            if !arg.is_empty() {
+                command.subcommand.0 = arg.clone();
+                i += 1;
+            }
         }
 
-        // Optional subcommand argument
+        // Subcommand argument
         if i < args.len() && !args[i].starts_with('-') {
             command.subcommand.1 = args[i].clone();
             i += 1;
@@ -55,8 +57,8 @@ impl CLI {
     pub fn result(&self, command: Command) {
         if let Some(result) = command.result {
             match result {
-                Ok(todos) => println!("{}", Todo::print_array(&todos)),
-                Err(err) => eprintln!("\x1b[31;1merror:\x1b[0m {}", err),
+                Ok(body) => println!("{}", &body),
+                Err(error) => eprintln!("\x1b[31;1merror:\x1b[0m {}", error),
             }
         } else {
             eprintln!("\x1b[31;1merror:\x1b[0m No valid result in command.");
