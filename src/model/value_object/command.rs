@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Command {
     pub subcommand: (String, String),
     pub options: HashMap<String, String>,

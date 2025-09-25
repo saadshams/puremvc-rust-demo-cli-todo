@@ -18,12 +18,15 @@ impl CLI {
         let mut command = Command::new();
 
         // Subcommand
-        if i < args.len() {
-            let arg = &args[i];
-            if !arg.is_empty() {
-                command.subcommand.0 = arg.clone();
-                i += 1;
-            }
+        if i < args.len() && !args[i].starts_with('-') && !args[i].starts_with("--") {
+            command.subcommand.0 = args[i].clone();
+            i += 1;
+        // if i < args.len() {
+        //     let arg = &args[i];
+        //     if !arg.is_empty() {
+        //         command.subcommand.0 = arg.clone();
+        //         i += 1;
+        //     }
         }
 
         // Subcommand argument
@@ -48,7 +51,7 @@ impl CLI {
                 i += 1; // extra positional argument
             }
         }
-
+        
         if let Some(delegate) = &self.delegate {
             delegate(Arc::new(command));
         }

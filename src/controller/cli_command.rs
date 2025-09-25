@@ -43,17 +43,20 @@ impl ICommand for CLICommand {
             "add" => self.result(proxy.add(command)),
             "edit" => self.result(proxy.edit(command)),
             "delete" => self.result(proxy.delete(command)),
-            "-h" | "--help" => self.result(proxy.help(command)),
-            "-v" | "--version" => self.result(proxy.version(command)),
-            "reset" => self.result(proxy.reset(command)),
             _ => {
-                let msg = if command.subcommand.0.is_empty() {
-                    "\x1b[31;1mError:\x1b[0m No subcommand was provided. See 'todo --help' for a list of commands.".to_string()
+                if command.options.contains_key("-h") || command.options.contains_key("--help") {
+                    self.result(proxy.help(command));
+                } else if command.options.contains_key("-v") || command.options.contains_key("--version") {
+                    self.result(proxy.version(command));
+                } else if command.options.contains_key("-r") || command.options.contains_key("--reset") {
+                    self.result(proxy.reset(command));
                 } else {
-                    format!("\x1b[31;1mError:\x1b[0m Unrecognized command '{}'. See 'todo --help'.", command.subcommand.0)
-                };
-
-                self.result(Err(msg))
+                   if command.subcommand.0.is_empty() {
+                        self.result(Err("\x1b[31;1mError:\x1b[0m No Command or Subcommand was provided. See 'todo --help' for a list of commands.".to_string()));
+                    } else {
+                        self.result(Err(format!("\x1b[31;1mError:\x1b[0m Unrecognized command '{}'. See 'todo --help'.", command.subcommand.0)));
+                    };
+                }
             }
         };
     }
