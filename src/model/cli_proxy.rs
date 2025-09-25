@@ -42,6 +42,7 @@ impl CLIProxy {
             todos.push(Todo { id, title: title.clone(), completed: false });
 
             self.write(&Todo::stringify_array(&todos))?;
+
             command.result = Some(Ok(Todo::print_array(&todos)));
             Ok(command)
         } else {
@@ -88,6 +89,7 @@ impl CLIProxy {
         }
 
         self.write(&Todo::stringify_array(&todos))?;
+
         command.result = Some(Ok(Todo::print_array(&todos)));
         Ok(command)
     }
@@ -128,7 +130,6 @@ impl CLIProxy {
         command.result = Some(Ok(Todo::print_array(&todos)));
         Ok(command)
     }
-
 }
 
 impl IProxy for CLIProxy {
