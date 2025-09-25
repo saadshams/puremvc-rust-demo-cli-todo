@@ -20,17 +20,17 @@ impl CLIProxy {
 
     fn read(&self) -> Result<String, String> {
         fs::read_to_string("todos.json")
-            .map_err(|e| format!("Error reading todos.json: {}", e))
+            .map_err(|e| format!("\x1b[31;1mError:\x1b[0m Unable to read file 'todos.json': {}", e))
     }
 
     fn write(&self, json: &str) -> Result<(), String> {
         fs::write("todos.json", format!("{}", json))
-            .map_err(|error| format!("Failed to write todos.json: {}", error))
+            .map_err(|error| format!("\x1b[31;1mError:\x1b[0m Unable to write file 'todos.json': {}", error))
     }
 
     pub fn list(&self, mut command: Command) -> Result<Command, String> {
         let todos = Todo::parse_array(&self.read()?);
-        command.result = Some(Ok(Todo::print_array(&todos)));
+        command.result = Ok(Todo::print_array(&todos));
         Ok(command)
     }
 
@@ -43,16 +43,16 @@ impl CLIProxy {
 
             self.write(&Todo::stringify_array(&todos))?;
 
-            command.result = Some(Ok(Todo::print_array(&todos)));
+            command.result = Ok(Todo::print_array(&todos));
             Ok(command)
         } else {
-            Err("No title provided (use -t or --title)".into())
+            Err("\x1b[31;1mError:\x1b[0m Missing required argument: --title (-t)".into())
         }
     }
 
     pub fn edit(&self, mut command: Command) -> Result<Command, String> {
         let title = command.options.get("-t").or_else(|| command.options.get("--title"))
-            .ok_or_else(|| "No title provided (use -t or --title)".to_string())?
+            .ok_or_else(|| "\x1b[31;1mError:\x1b[0m Missing required argument: --title (-t)".to_string())?
             .clone();
 
         let completed = command.options.get("-c").or_else(|| command.options.get("--completed"))
@@ -60,7 +60,7 @@ impl CLIProxy {
             .unwrap_or(false);
 
         let id = command.subcommand.1.parse::<u32>()
-            .map_err(|e| format!("Invalid id: {e}"))?;
+            .map_err(|e| format!("\x1b[31;1mError:\x1b[0m Invalid ID format: {e}"))?;
 
         let mut todos = Todo::parse_array(&self.read()?);
 
@@ -73,14 +73,14 @@ impl CLIProxy {
 
         self.write(&Todo::stringify_array(&todos))?;
 
-        command.result = Some(Ok(Todo::print_array(&todos)));
+        command.result = Ok(Todo::print_array(&todos));
         Ok(command)
     }
 
     pub fn delete(&self, mut command: Command) -> Result<Command, String> {
         let id = command.subcommand.1
             .parse::<u32>()
-            .map_err(|e| format!("Invalid id: {e}"))?;
+            .map_err(|e| format!("\x1b[31;1mError:\x1b[0m Invalid ID format:: {e}"))?;
 
         let mut todos = Todo::parse_array(&self.read()?);
         todos.retain(|todo| todo.id != id);
@@ -90,7 +90,7 @@ impl CLIProxy {
 
         self.write(&Todo::stringify_array(&todos))?;
 
-        command.result = Some(Ok(Todo::print_array(&todos)));
+        command.result = Ok(Todo::print_array(&todos));
         Ok(command)
     }
 
@@ -106,14 +106,14 @@ impl CLIProxy {
          - reset                 Reset todos.json to default"
         );
 
-        command.result = Some(Ok(body));
+        command.result = Ok(body);
         Ok(command)
     }
 
     pub fn version(&self, mut command: Command) -> Result<Command, String> {
         let body = format!("todo version {}", env!("CARGO_PKG_VERSION"));
 
-        command.result = Some(Ok(body));
+        command.result = Ok(body);
         Ok(command)
     }
 
@@ -127,7 +127,7 @@ impl CLIProxy {
 ]"#)?;
 
         let todos = Todo::parse_array(&self.read()?);
-        command.result = Some(Ok(Todo::print_array(&todos)));
+        command.result = Ok(Todo::print_array(&todos));
         Ok(command)
     }
 }

@@ -52,13 +52,13 @@ impl IMediator for CLIMediator {
             ApplicationFacade::CLI_RESULT => {
                 let command = notification.body()
                     .and_then(|arc| arc.downcast_ref::<Command>().cloned())
-                    .expect("[CLIMediator] Error: Could not read todos");
+                    .expect("[CLIMediator] Error: Could not read Command");
                 self.cli().read().unwrap().result(command);
             },
             ApplicationFacade::CLI_FAULT => {
                 let error = notification.body()
                     .and_then(|arc| arc.downcast_ref::<String>().cloned())
-                    .expect("[CLIMediator] Error: Could not read error");
+                    .expect("[CLIMediator] Error: Could not read message");
                 self.cli().read().unwrap().fault(error)
             },
             _ => {},

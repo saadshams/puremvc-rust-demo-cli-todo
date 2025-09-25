@@ -21,12 +21,6 @@ impl CLI {
         if i < args.len() && !args[i].starts_with('-') && !args[i].starts_with("--") {
             command.subcommand.0 = args[i].clone();
             i += 1;
-        // if i < args.len() {
-        //     let arg = &args[i];
-        //     if !arg.is_empty() {
-        //         command.subcommand.0 = arg.clone();
-        //         i += 1;
-        //     }
         }
 
         // Subcommand argument
@@ -35,7 +29,7 @@ impl CLI {
             i += 1;
         }
 
-        // Parse remaining options
+        // Options
         while i < args.len() {
             let arg = &args[i];
             if arg.starts_with("--") || arg.starts_with('-') {
@@ -51,21 +45,14 @@ impl CLI {
                 i += 1; // extra positional argument
             }
         }
-        
+
         if let Some(delegate) = &self.delegate {
             delegate(Arc::new(command));
         }
     }
 
     pub fn result(&self, command: Command) {
-        if let Some(result) = command.result {
-            match result {
-                Ok(body) => println!("{}", &body),
-                Err(error) => eprintln!("\x1b[31;1merror:\x1b[0m {}", error),
-            }
-        } else {
-            eprintln!("\x1b[31;1merror:\x1b[0m No valid result in command.");
-        }
+        println!("{}", command.result.unwrap());
     }
 
     pub fn fault(&self, error: String) {
