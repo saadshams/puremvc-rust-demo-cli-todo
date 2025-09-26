@@ -11,7 +11,7 @@ pub struct CLIMediator {
 }
 
 impl CLIMediator {
-    pub const NAME: &'static str = "UtilityMediator";
+    pub const NAME: &'static str = "CLIMediator";
 
     pub fn new(component: &Arc<dyn Any + Send + Sync>) -> CLIMediator {
         Self {
